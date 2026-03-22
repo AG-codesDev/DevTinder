@@ -1,0 +1,39 @@
+--> LLD
+
+ * 2 Microservices will be used 
+        --> Frontend
+        --> Backend
+
+
+
+* DB design
+  
+  1. User Collection   
+             - firstName
+             - lastName
+             - emailId
+             - password
+             - age
+             - gender
+             - ........etc
+
+2. Connection Request Collection 
+                      - from userId
+                      - to userId
+                      - status -> (pending, accepted, rejected, ingonred...)
+
+
+* API design
+        - POST /signup
+        - POST /login
+        - GET /Profile
+        - POST /Profile
+        - PATCH /Profile
+        - DELETE /Profile
+        - POST /SendRequest - igonre
+                            - interested
+
+        - POST /reviewRequest - accept
+                              - reject
+        - GET /requests
+        - GET /connections

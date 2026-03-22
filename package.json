@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "Tinder for dev",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
+  },
+  "keywords": [
+    "js",
+    "nodejs",
+    "backend"
+  ],
+  "author": "Apurva Gaurav",
+  "license": "ISC"
+}
