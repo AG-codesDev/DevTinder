@@ -1,28 +1,25 @@
 const express = require("express");
+const { adminAuth, userAuth } = require("./middlewares/auth.js");
 
 const app = express();
 
+app.use("/admin", adminAuth);
+
+app.get("/admin/getUser", (req, res) => {
+  res.send("Getting user data from database");
+});
+app.get("/admin/deleteUser", (req, res) => {
+  res.send("User deleted from database");
+});
+
+app.get("/user/addProfile", userAuth, (req, res) => {
+  res.send("User profile added");
+});
+
+app.get("/user/login", (req, res) => {
+  res.send("User login successful");
+});
+
 app.listen(7777, () => {
   console.log("Server is running successfully on port 7777");
-});
-
-// app.use("/user", (req, res) => {
-//   res.send("Hello from USER");
-// });
-
-//dynamic routes
-app.get("/user/:id/:name", (req, res) => {
-  // responding to get request
-  console.log(req.query);
-  res.send(`THIS IS USER with ${req.params.id} and name ${req.params.name} `);
-});
-
-app.post("/user", (req, res) => {
-  //saved data to database
-  res.send({ firstName: "Apurva", lastName: "Gaurav" });
-});
-
-app.delete("/user", (req, res) => {
-  //deleted data from database
-  res.send("Deleted data from DB successfully");
 });
