@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^8.23.0"
   },
   "name": "devtinder",
   "version": "1.0.0",
   "description": "Tinder for dev",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "dev": "nodemon src/app.js",
     "start": "node src/app.js"
