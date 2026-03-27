@@ -1,7 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 const { connectDB } = require("./config/databse");
 const UserModel = require("./models/User");
-require("dotenv").config();
 
 const app = express();
 app.use(express.json());
@@ -37,6 +37,42 @@ app.post("/signup", async (req, res) => {
 
   await user.save();
   res.send("User added successfully!");
+});
+
+app.delete("/user", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    console.log(userId);
+    const deletedUser = await UserModel.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).send("User not found");
+    }
+
+    res.send("user deleted");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Something went wrong");
+  }
+});
+
+app.put("/user", async (req, res) => {
+  try {
+    const emailId = req.body.emaiId;
+    const updatedUser = await UserModel.findOneAndUpdate(emailId, req.body, {
+      new: true,
+    });
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }
+    res.status(200).json({
+      message: "user Updated!",
+      data: updatedUser,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Something went wrong");
+  }
 });
 
 connectDB()
