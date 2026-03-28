@@ -33,10 +33,13 @@ app.get("/feed", async (req, res) => {
 
 app.post("/signup", async (req, res) => {
   //creating new instance of user model
-  const user = new UserModel(req.body);
-
-  await user.save();
-  res.send("User added successfully!");
+  try {
+    const user = new UserModel(req.body);
+    await user.save();
+    res.send("User added successfully!");
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
 });
 
 app.delete("/user", async (req, res) => {
@@ -56,12 +59,17 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.put("/user", async (req, res) => {
+app.patch("/user", async (req, res) => {
   try {
-    const emailId = req.body.emaiId;
-    const updatedUser = await UserModel.findOneAndUpdate(emailId, req.body, {
-      new: true,
-    });
+    const emailId = req.body.emailId;
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email: emailId },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
     if (!updatedUser) {
       return res.status(404).send("User not found");
     }
@@ -71,7 +79,7 @@ app.put("/user", async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).send("Something went wrong");
+    res.status(500).send(err.message);
   }
 });
 
