@@ -47,20 +47,12 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "password is required"],
       minlength: [5, "Min 5 characters needed"],
-      maxlength: [12, "Max 12 characters needed"],
       validate: {
         validator(value) {
-          return (
-            validator.isStrongPassword(value, {
-              minLength: 5,
-              minLowercase: 0,
-              minUppercase: 0,
-              minNumbers: 0,
-              minSymbols: 0,
-            }) && validator.isLength(value, { min: 5, max: 12 })
-          );
+          return validator.isStrongPassword(value); // simply return true or false
         },
-        message: "Password must be between 5 and 12 characters",
+        message:
+          "Password must be at least 8 chars with uppercase, lowercase, number, and symbol",
       },
     },
     age: {

@@ -2,8 +2,10 @@ require("dotenv").config();
 const express = require("express");
 const { connectDB } = require("./config/databse");
 const UserModel = require("./models/User");
-
+const { validateSignupRequest } = require("./utils/Validations");
+const bcrypt = require("bcrypt");
 const app = express();
+
 app.use(express.json());
 
 app.get("/user", async (req, res) => {
@@ -31,10 +33,33 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (isPasswordValid) {
+      res.send("Login Successfull!!");
+    } else {
+      throw new Error("Invalid Credentials");
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
 app.post("/signup", async (req, res) => {
   //creating new instance of user model
 
   try {
+    validateSignupRequest(req);
+
     const allowedFields = ["firstName", "lastName", "email", "password"];
 
     const isAllowed = Object.keys(req.body).every((field) =>
@@ -49,7 +74,14 @@ app.post("/signup", async (req, res) => {
     }
 
     const { firstName, lastName, email, password } = req.body;
-    const user = new UserModel({ firstName, lastName, email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new UserModel({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
     await user.save();
     res.send("User added successfully!");
   } catch (err) {
