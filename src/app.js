@@ -33,11 +33,29 @@ app.get("/feed", async (req, res) => {
 
 app.post("/signup", async (req, res) => {
   //creating new instance of user model
+
   try {
-    const user = new UserModel(req.body);
+    const allowedFields = ["firstName", "lastName", "email", "password"];
+
+    const isAllowed = Object.keys(req.body).every((field) =>
+      allowedFields.includes(field),
+    );
+    if (!isAllowed) {
+      return res
+        .status(400)
+        .send(
+          "Invalid request fields found - Only FirstName,LastName,Email and Password should be provided",
+        );
+    }
+
+    const { firstName, lastName, email, password } = req.body;
+    const user = new UserModel({ firstName, lastName, email, password });
     await user.save();
     res.send("User added successfully!");
   } catch (err) {
+    if (err.code === 1100) {
+      return res.status(400).send("Email already exists");
+    }
     res.status(400).send(err.message);
   }
 });
@@ -59,17 +77,32 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   try {
-    const emailId = req.body.emailId;
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { email: emailId },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      },
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "password",
+      "age",
+      "photoURL",
+      "bio",
+      "age",
+      "skills",
+    ];
+
+    const isUpdateAllowed = Object.keys(req.body).every((field) =>
+      allowedFields.includes(field),
     );
+
+    if (!isUpdateAllowed) {
+      return res.status(400).send("Invalid fields in requests");
+    }
+
+    const userId = req.params.userId;
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!updatedUser) {
       return res.status(404).send("User not found");
     }

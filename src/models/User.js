@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
+
 const userSchema = mongoose.Schema(
   {
     firstName: {
@@ -7,10 +9,26 @@ const userSchema = mongoose.Schema(
       trim: true,
       minlength: [2, "Min 2 characters"],
       maxlength: [50, "Max 50 characters"],
+      validate: {
+        validator(value) {
+          return validator.matches(value, /^[a-zA-Z\s'-]+$/);
+        },
+        message:
+          "First name may only contain letters, spaces, hyphens, and apostrophes",
+      },
     },
     lastName: {
       type: String,
       trim: true,
+      maxlength: [50, "Max 50 characters"],
+      validate: {
+        validator(value) {
+          if (value == null || value === "") return true;
+          return validator.matches(value, /^[a-zA-Z\s'-]+$/);
+        },
+        message:
+          "Last name may only contain letters, spaces, hyphens, and apostrophes",
+      },
     },
     email: {
       type: String,
@@ -18,17 +36,44 @@ const userSchema = mongoose.Schema(
       trim: true,
       lowercase: true,
       unique: true,
+      validate: {
+        validator(value) {
+          return validator.isEmail(value);
+        },
+        message: "Please provide a valid email address",
+      },
     },
     password: {
       type: String,
       required: [true, "password is required"],
       minlength: [5, "Min 5 characters needed"],
       maxlength: [12, "Max 12 characters needed"],
+      validate: {
+        validator(value) {
+          return (
+            validator.isStrongPassword(value, {
+              minLength: 5,
+              minLowercase: 0,
+              minUppercase: 0,
+              minNumbers: 0,
+              minSymbols: 0,
+            }) && validator.isLength(value, { min: 5, max: 12 })
+          );
+        },
+        message: "Password must be between 5 and 12 characters",
+      },
     },
     age: {
       type: Number,
       min: [18, "Min age required is 18"],
       max: [60, "Age above 60 is not valid"],
+      validate: {
+        validator(value) {
+          if (value == null) return true;
+          return validator.isInt(String(value), { min: 18, max: 60 });
+        },
+        message: "Age must be a whole number between 18 and 60",
+      },
     },
     gender: {
       type: String,
@@ -37,14 +82,37 @@ const userSchema = mongoose.Schema(
     bio: {
       type: String,
       default: "This is a default user bio",
+      maxlength: [500, "Bio cannot exceed 500 characters"],
     },
     photoURL: {
       type: String,
       default:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKT-zEVF-E4SEkm3us25N1DoHQLnC4XWumjw&s",
+      validate: {
+        validator(value) {
+          return validator.isURL(value, {
+            protocols: ["http", "https"],
+            require_protocol: true,
+          });
+        },
+        message: "Photo URL must be a valid http(s) URL",
+      },
     },
     skills: {
-      type: [],
+      type: [String],
+      validate: {
+        validator(skills) {
+          if (!Array.isArray(skills)) return false;
+          if (skills.length > 10) return false;
+          return skills.every(
+            (s) =>
+              typeof s === "string" &&
+              validator.isLength(s.trim(), { min: 1, max: 50 }),
+          );
+        },
+        message:
+          "Skills must be an array of up to 10 non-empty strings (max 50 characters each)",
+      },
     },
   },
   {
