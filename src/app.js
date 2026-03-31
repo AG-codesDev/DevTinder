@@ -5,33 +5,12 @@ const UserModel = require("./models/User");
 const { validateSignupRequest } = require("./utils/Validations");
 const bcrypt = require("bcrypt");
 const app = express();
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
-
-app.get("/user", async (req, res) => {
-  try {
-    const userEmail = req.body.email;
-    const user = await UserModel.findOne({ email: userEmail });
-    // const user = await UserModel.find({ email: userEmail });
-
-    if (user === null) {
-      res.status(404).send("User not found");
-    } else {
-      res.send(user);
-    }
-  } catch (err) {
-    res.status(500).send("Something Went wrong at our end!");
-  }
-});
-
-app.get("/feed", async (req, res) => {
-  try {
-    res.send(await UserModel.find({}));
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Something went wrong");
-  }
-});
+app.use(cookieParser());
 
 app.post("/login", async (req, res) => {
   try {
@@ -43,12 +22,33 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid Credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.isPasswordValid(password);
+
     if (isPasswordValid) {
+      const token = await user.getJWT();
+      res.cookie("token", token);
       res.send("Login Successfull!!");
     } else {
       throw new Error("Invalid Credentials");
     }
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    res.send(req.user);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+  try {
+    const { user } = req;
+
+    res.send(user.firstName + " sent you connection request");
   } catch (err) {
     res.status(400).send(err.message);
   }
@@ -89,23 +89,6 @@ app.post("/signup", async (req, res) => {
       return res.status(400).send("Email already exists");
     }
     res.status(400).send(err.message);
-  }
-});
-
-app.delete("/user", async (req, res) => {
-  try {
-    const userId = req.body.userId;
-    console.log(userId);
-    const deletedUser = await UserModel.findByIdAndDelete(userId);
-
-    if (!deletedUser) {
-      return res.status(404).send("User not found");
-    }
-
-    res.send("user deleted");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Something went wrong");
   }
 });
 
