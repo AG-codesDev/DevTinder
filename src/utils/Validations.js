@@ -1,4 +1,5 @@
 const validator = require("validator");
+
 const validateSignupRequest = (req) => {
   const { firstName, lastName, email, password } = req.body;
   if (!firstName || !email || !password) {
