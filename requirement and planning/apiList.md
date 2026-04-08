@@ -16,13 +16,11 @@
 
 //send request
 
-- POST /request/send/interested/:userId
-- POST /request/send/rejected/:userId
+- POST /request/send/:status/:userId
 
 //received request
 
-- POST /request/review/accepted/:requestId
-- POST /request/review/rejected/:requestId
+- POST /request/review/:status/:requestId
 
 ## userRouter
 
