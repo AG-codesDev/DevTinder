@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema(
       trim: true,
       minlength: [2, "Min 2 characters"],
       maxlength: [50, "Max 50 characters"],
+
       validate: {
         validator(value) {
           return validator.matches(value, /^[a-zA-Z\s'-]+$/);
